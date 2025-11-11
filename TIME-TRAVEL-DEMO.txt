@@ -1,0 +1,299 @@
+========================================
+TIME TRAVEL TESTING - MANUAL GUIDE
+Testing FD Account Maturity & Batch Processing
+========================================
+
+OVERVIEW:
+---------
+This guide demonstrates how to use the time travel feature to test FD account 
+maturity and batch processing without waiting for real time to pass.
+
+PREREQUISITES:
+--------------
+1. All services running (Gateway, Customer, Product, Pricing, Accounts)
+2. Admin access to the application
+3. At least one product and customer created
+
+========================================
+STEP-BY-STEP DEMONSTRATION
+========================================
+
+STEP 1: Login to Admin Dashboard
+---------------------------------
+1. Open browser: http://localhost:5173
+2. Login with admin credentials:
+   - Email: admin@bank.com
+   - Password: admin123
+3. Navigate to Admin Dashboard
+
+STEP 2: Check Current System Time
+----------------------------------
+In the Admin Dashboard, find the "System Time" card:
+- Current System Time: [displays current time]
+- Offset: 0s (initially)
+
+This shows the system is using real time.
+
+STEP 3: Create a Test FD Account
+---------------------------------
+1. Go to "Open Account" page
+2. Create a new FD account with:
+   - Customer: Select any customer
+   - Product: Select any FD product
+   - Principal Amount: ₹100,000
+   - Tenure: 24 months (2 years)
+   - Interest Rate: 7.5%
+3. Note the Account Number created
+
+Expected Result:
+- Account Status: ACTIVE
+- Principal: ₹100,000
+- Maturity Date: 2 years from creation
+- Next Interest Accrual: 1 year from creation
+
+STEP 4: Time Travel - Advance 1 Year
+-------------------------------------
+In Admin Dashboard > System Time section:
+
+Option A - Use Quick Buttons:
+   Click "+1d" button 365 times (not practical!)
+   
+Option B - Use Advance By Seconds:
+   1. Enter: 31536000 (seconds in 1 year)
+   2. Click "Advance" button
+   
+Option C - Set Absolute Time:
+   1. Calculate target date: Current date + 1 year
+   2. Format as ISO: 2026-11-11T00:00:00Z
+   3. Enter in "Set Absolute Time" field
+   4. Press Enter
+
+Expected Result:
+- System Time jumps forward 1 year
+- Offset shows: 31536000s
+
+STEP 5: Wait for Batch Processing
+----------------------------------
+The AccrualScheduler runs every 60 seconds.
+
+Wait 65 seconds, then check the account:
+1. Go to "My Accounts" or "All Accounts"
+2. Find your test account
+3. Click to view details
+
+Expected Result:
+- Status: Still ACTIVE
+- Total Interest Accrued: ₹7,500 (7.5% of ₹100,000)
+- Last Interest Accrual At: ~1 year after creation
+- Current Balance: ₹107,500 (principal + interest)
+- Transaction History shows: INTEREST_CREDIT transaction
+
+STEP 6: Time Travel - Advance Another 1 Year (to Maturity)
+-----------------------------------------------------------
+In Admin Dashboard > System Time:
+
+1. Enter: 31536000 (another year)
+2. Click "Advance" button
+
+OR
+
+1. Calculate: Current date + 2 years total
+2. Set absolute time to maturity date
+
+Expected Result:
+- System Time: 2 years from original creation
+- Offset: 63072000s (2 years)
+
+STEP 7: Wait for Maturity Processing
+-------------------------------------
+Wait 65 seconds for the batch job to process maturity.
+
+Then check the account again:
+
+Expected Result:
+- Status: MATURED (changed from ACTIVE)
+- Total Interest Accrued: ₹15,000+ (compound interest)
+- Closed At: [maturity date]
+- Transaction History shows:
+  * INTEREST_CREDIT (year 1)
+  * INTEREST_CREDIT (year 2)
+  * MATURITY_PAYOUT (final payout to wallet)
+
+STEP 8: Verify Maturity Payout
+-------------------------------
+Check the customer's wallet:
+1. Go to "Wallet" page
+2. Verify balance increased by maturity amount
+
+Expected Result:
+- Wallet balance includes the maturity payout
+- Transaction history shows the payout
+
+STEP 9: Reset Time to Present
+------------------------------
+In Admin Dashboard > System Time:
+
+1. Click "Reset" button
+
+Expected Result:
+- System Time returns to real current time
+- Offset: 0s
+- The matured account remains MATURED (permanent state)
+
+========================================
+WHAT HAPPENS BEHIND THE SCENES
+========================================
+
+1. TIME PROVIDER:
+   - Maintains a global time offset
+   - All time-dependent operations use TimeProvider.now()
+   - Advancing time updates this offset
+
+2. ACCRUAL SCHEDULER:
+   - Runs every 60 seconds (@Scheduled)
+   - Checks all ACTIVE accounts
+   - Compares nextInterestAccrualAt with current system time
+   - If due, calculates and credits interest
+   - Updates account metadata
+
+3. MATURITY PROCESSING:
+   - Scheduler checks if account reached maturity date
+   - Calculates final balance (principal + all accrued interest)
+   - Creates MATURITY_PAYOUT transaction
+   - Changes account status to MATURED
+   - Sets closedAt timestamp
+
+4. BATCH PROCESSING FLOW:
+   For each ACTIVE account:
+   a. Calculate current balance from transactions
+   b. Evaluate pricing rules (may adjust interest rate)
+   c. If nextInterestAccrualAt <= now:
+      - Calculate interest: balance × (rate/100)
+      - Add interest tokens to treasury
+      - Create INTEREST_CREDIT transaction
+      - Update lastInterestAccrualAt
+      - Set nextInterestAccrualAt = current + 1 year
+   d. If maturityDate <= now:
+      - Create MATURITY_PAYOUT transaction
+      - Mark account as MATURED
+      - Set closedAt timestamp
+
+========================================
+KEY FEATURES DEMONSTRATED
+========================================
+
+✅ Time Travel:
+   - Jump forward/backward in time
+   - Test future scenarios instantly
+   - No need to wait for real time
+
+✅ Batch Processing:
+   - Automatic interest accrual
+   - Scheduled every 60 seconds
+   - Processes all eligible accounts
+
+✅ Interest Calculation:
+   - Annual compounding
+   - Based on current balance
+   - Pricing rules can override rates
+
+✅ Maturity Handling:
+   - Automatic detection
+   - Payout to customer wallet
+   - Account closure
+
+✅ Audit Trail:
+   - All transactions recorded
+   - Complete history maintained
+   - Timestamps use system time
+
+========================================
+TESTING SCENARIOS
+========================================
+
+Scenario 1: Early Redemption
+- Create account
+- Advance time 6 months
+- Redeem before maturity
+- Verify penalty applied (if configured)
+
+Scenario 2: Multiple Accounts
+- Create 5 accounts with different tenures
+- Advance time 1 year
+- Verify only eligible accounts get interest
+- Advance to various maturity dates
+
+Scenario 3: Pricing Rule Changes
+- Create account with base rate
+- Advance time 6 months
+- Update pricing rules
+- Advance another 6 months
+- Verify new rate applied to next accrual
+
+Scenario 4: Large Time Jumps
+- Create account
+- Advance time 5 years at once
+- Verify all annual accruals processed
+- Check compound interest calculation
+
+========================================
+TROUBLESHOOTING
+========================================
+
+Issue: Batch processing not running
+Solution: 
+- Check accounts service logs
+- Verify AccrualScheduler is enabled
+- Wait full 65 seconds after time advance
+
+Issue: Interest not accrued
+Solution:
+- Verify account status is ACTIVE
+- Check nextInterestAccrualAt is in the past
+- Ensure principal amount > 0
+- Check interest rate is set
+
+Issue: Account not maturing
+Solution:
+- Verify maturityDate is set correctly
+- Ensure time advanced past maturity date
+- Check account has ACTIVE status before maturity
+
+Issue: Time reset doesn't work
+Solution:
+- Use the Reset button in Admin Dashboard
+- Verify offset returns to 0
+- Refresh the page
+
+========================================
+API ENDPOINTS FOR AUTOMATION
+========================================
+
+Get System Time:
+GET /api/accounts/admin/time
+Authorization: Bearer {token}
+
+Set Absolute Time:
+PUT /api/accounts/admin/time
+Content-Type: application/json
+{"systemTime": "2026-11-11T00:00:00Z"}
+
+Advance Time:
+POST /api/accounts/admin/time/advance
+Content-Type: application/json
+{"seconds": 31536000}
+
+Reset Time:
+POST /api/accounts/admin/time/reset
+
+Get Account Details:
+GET /api/accounts/{accountNo}
+Authorization: Bearer {token}
+
+Get Transactions:
+GET /api/accounts/{accountNo}/transactions
+Authorization: Bearer {token}
+
+========================================
+END OF GUIDE
+========================================

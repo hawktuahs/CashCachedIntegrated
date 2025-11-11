@@ -1,0 +1,116 @@
+spring:
+  config:
+    import: optional:file:.env[.properties],optional:file:../.env[.properties]
+  application:
+    name: accounts-service
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:true}
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/accounts_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:Aarav}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: accounts-service
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 60000
+      jedis:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
+      cache-null-values: false
+
+server:
+  port: ${SERVER_PORT:8084}
+  servlet:
+    context-path: /
+
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+services:
+  product:
+    url: ${SERVICES_PRODUCT_URL:http://localhost:8082}
+  customer:
+    url: ${SERVICES_CUSTOMER_URL:http://localhost:8081}
+    username: ${SERVICES_CUSTOMER_USERNAME:accounts-service@cashcached.local}
+    password: ${SERVICES_CUSTOMER_PASSWORD:ChangeMe123!}
+
+accounts:
+  sequence:
+    initial-value: 10000001
+    prefix: FD
+  iban:
+    enabled: true
+    country-code: IN
+    bank-code: SBIN
+
+cashcached:
+  rpc-url: ${CASHCACHED_RPC_URL:https://polygon-amoy.g.alchemy.com/v2/demo}
+  contract-address: ${CASHCACHED_CONTRACT_ADDRESS:0x0000000000000000000000000000000000000000}
+  treasury-private-key: ${CASHCACHED_TREASURY_PRIVATE_KEY:0x0}
+  treasury-address: ${CASHCACHED_TREASURY_ADDRESS:0x0000000000000000000000000000000000000000}
+
+app:
+  kafka:
+    request-timeout-seconds: ${KAFKA_REQUEST_TIMEOUT:5}
+  redis:
+    rate-limit:
+      max-requests: 100
+      window-seconds: 60
+    cache:
+      ttl-hours: 6
+    session:
+      ttl-hours: 24
+  mail:
+    from: ${APP_MAIL_FROM:${spring.mail.username}}
+    dev-mode: ${APP_MAIL_DEV_MODE:false}
+  frontend:
+    url: ${APP_FRONTEND_URL:http://localhost:5173}

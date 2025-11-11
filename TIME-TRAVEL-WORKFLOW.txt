@@ -1,0 +1,206 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    TIME TRAVEL TESTING WORKFLOW                            ║
+║                  FD Account Maturity & Batch Processing                    ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ INITIAL STATE (T=0)                                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  System Time: 2025-11-11 02:00:00                                          │
+│  Offset: 0 seconds                                                          │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────┐          │
+│  │ FD Account: ACC-12345                                        │          │
+│  │ Status: ACTIVE                                               │          │
+│  │ Principal: ₹100,000                                          │          │
+│  │ Interest Rate: 7.5%                                          │          │
+│  │ Tenure: 24 months                                            │          │
+│  │ Created: 2025-11-11                                          │          │
+│  │ Maturity: 2027-11-11                                         │          │
+│  │ Next Accrual: 2026-11-11                                     │          │
+│  │ Total Interest: ₹0                                           │          │
+│  └─────────────────────────────────────────────────────────────┘          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ TIME TRAVEL: +1 Year
+                                    │ Advance 31,536,000 seconds
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ AFTER 1 YEAR (T=1)                                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  System Time: 2026-11-11 02:00:00                                          │
+│  Offset: 31,536,000 seconds (365 days)                                     │
+│                                                                             │
+│  ┌──────────────────────────────────────────────────────────┐             │
+│  │ AccrualScheduler runs (every 60 seconds)                 │             │
+│  │ ┌────────────────────────────────────────────────────┐   │             │
+│  │ │ 1. Detect: nextAccrualAt <= now                    │   │             │
+│  │ │ 2. Calculate: ₹100,000 × 7.5% = ₹7,500            │   │             │
+│  │ │ 3. Add ₹7,500 to treasury                          │   │             │
+│  │ │ 4. Create INTEREST_CREDIT transaction              │   │             │
+│  │ │ 5. Update account metadata                         │   │             │
+│  │ └────────────────────────────────────────────────────┘   │             │
+│  └──────────────────────────────────────────────────────────┘             │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────┐          │
+│  │ FD Account: ACC-12345                                        │          │
+│  │ Status: ACTIVE                                               │          │
+│  │ Principal: ₹100,000                                          │          │
+│  │ Current Balance: ₹107,500                                    │          │
+│  │ Last Accrual: 2026-11-11                                     │          │
+│  │ Next Accrual: 2027-11-11                                     │          │
+│  │ Total Interest: ₹7,500                                       │          │
+│  │                                                              │          │
+│  │ Transactions:                                                │          │
+│  │   [2026-11-11] INTEREST_CREDIT: +₹7,500                     │          │
+│  └─────────────────────────────────────────────────────────────┘          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ TIME TRAVEL: +1 Year
+                                    │ Advance another 31,536,000 seconds
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ AT MATURITY (T=2)                                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  System Time: 2027-11-11 02:00:00                                          │
+│  Offset: 63,072,000 seconds (730 days)                                     │
+│                                                                             │
+│  ┌──────────────────────────────────────────────────────────┐             │
+│  │ AccrualScheduler runs                                    │             │
+│  │ ┌────────────────────────────────────────────────────┐   │             │
+│  │ │ INTEREST ACCRUAL (Year 2):                        │   │             │
+│  │ │ 1. Calculate: ₹107,500 × 7.5% = ₹8,062.50        │   │             │
+│  │ │ 2. Round up: ₹8,063                               │   │             │
+│  │ │ 3. Create INTEREST_CREDIT transaction             │   │             │
+│  │ │ 4. New balance: ₹115,563                          │   │             │
+│  │ └────────────────────────────────────────────────────┘   │             │
+│  │                                                          │             │
+│  │ ┌────────────────────────────────────────────────────┐   │             │
+│  │ │ MATURITY PROCESSING:                               │   │             │
+│  │ │ 1. Detect: maturityDate <= now                     │   │             │
+│  │ │ 2. Calculate final payout: ₹115,563               │   │             │
+│  │ │ 3. Create MATURITY_PAYOUT transaction              │   │             │
+│  │ │ 4. Transfer to customer wallet                     │   │             │
+│  │ │ 5. Change status to MATURED                        │   │             │
+│  │ │ 6. Set closedAt timestamp                          │   │             │
+│  │ └────────────────────────────────────────────────────┘   │             │
+│  └──────────────────────────────────────────────────────────┘             │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────┐          │
+│  │ FD Account: ACC-12345                                        │          │
+│  │ Status: MATURED ✓                                            │          │
+│  │ Principal: ₹100,000                                          │          │
+│  │ Final Balance: ₹0 (paid out)                                │          │
+│  │ Total Interest: ₹15,563                                      │          │
+│  │ Closed At: 2027-11-11                                        │          │
+│  │                                                              │          │
+│  │ Transactions:                                                │          │
+│  │   [2026-11-11] INTEREST_CREDIT: +₹7,500                     │          │
+│  │   [2027-11-11] INTEREST_CREDIT: +₹8,063                     │          │
+│  │   [2027-11-11] MATURITY_PAYOUT: -₹115,563                   │          │
+│  └─────────────────────────────────────────────────────────────┘          │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────┐          │
+│  │ Customer Wallet                                              │          │
+│  │ Balance: +₹115,563 (from maturity payout)                   │          │
+│  └─────────────────────────────────────────────────────────────┘          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ TIME RESET
+                                    │ Return to present
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ BACK TO PRESENT                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  System Time: 2025-11-11 02:00:00 (real time)                             │
+│  Offset: 0 seconds                                                          │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────┐          │
+│  │ FD Account: ACC-12345                                        │          │
+│  │ Status: MATURED ✓ (permanent state)                         │          │
+│  │ Total Interest Earned: ₹15,563                               │          │
+│  │ Payout Completed: ✓                                          │          │
+│  │                                                              │          │
+│  │ Note: Account remains MATURED even after time reset         │          │
+│  │ All transactions are preserved with their timestamps         │          │
+│  └─────────────────────────────────────────────────────────────┘          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                         KEY COMPONENTS                                     ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ TimeProvider                                                             │
+├──────────────────────────────────────────────────────────────────────────┤
+│ • Maintains global time offset (AtomicLong)                              │
+│ • now() = Instant.now() + offsetSeconds                                  │
+│ • Used by all time-dependent operations                                  │
+│ • Thread-safe for concurrent access                                      │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ AccrualScheduler                                                         │
+├──────────────────────────────────────────────────────────────────────────┤
+│ • @Scheduled(fixedDelay = 60_000) - runs every 60 seconds               │
+│ • Processes all ACTIVE accounts                                          │
+│ • Checks nextInterestAccrualAt against system time                       │
+│ • Calculates compound interest on current balance                        │
+│ • Creates INTEREST_CREDIT transactions                                   │
+│ • Detects and processes maturity                                         │
+│ • Updates account metadata atomically                                    │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ Admin Time Controller                                                    │
+├──────────────────────────────────────────────────────────────────────────┤
+│ • GET /api/accounts/admin/time - Get current time & offset              │
+│ • PUT /api/accounts/admin/time - Set absolute time                       │
+│ • POST /api/accounts/admin/time/advance - Advance by seconds            │
+│ • POST /api/accounts/admin/time/reset - Reset to real time              │
+│ • Requires ADMIN or BANKOFFICER role                                     │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                      INTEREST CALCULATION                                  ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Year 1:
+  Principal: ₹100,000
+  Rate: 7.5%
+  Interest: ₹100,000 × 0.075 = ₹7,500
+  New Balance: ₹107,500
+
+Year 2 (Compound Interest):
+  Balance: ₹107,500
+  Rate: 7.5%
+  Interest: ₹107,500 × 0.075 = ₹8,062.50 → ₹8,063 (rounded up)
+  Final Balance: ₹115,563
+
+Total Interest Earned: ₹15,563 (15.56% over 2 years)
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    TESTING ADVANTAGES                                      ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+✓ Test 2-year maturity in ~2 minutes instead of 2 years
+✓ Verify batch processing without waiting
+✓ Test multiple scenarios rapidly
+✓ Validate compound interest calculations
+✓ Ensure maturity handling works correctly
+✓ Check transaction history accuracy
+✓ Verify wallet integration
+✓ Test pricing rule changes over time
+✓ Simulate edge cases (leap years, etc.)
+✓ No impact on production data (time is virtual)

@@ -1,0 +1,123 @@
+================================================================================
+                    CASHCACHED - ALL SERVICES RUNNING ✅
+================================================================================
+
+DOCKER SERVICES (Running via Docker Desktop)
+--------------------------------------------------------------------------------
+✅ Zookeeper       - Port 2181 - RUNNING
+✅ Kafka           - Port 9092 - RUNNING  
+✅ Redis           - Port 6379 - RUNNING
+✅ Kafdrop (UI)    - Port 9000 - RUNNING - http://localhost:9000
+✅ MySQL           - Port 3306 - RUNNING (Local instance, root/Aarav)
+
+SPRING BOOT MICROSERVICES (Running in separate CMD windows)
+--------------------------------------------------------------------------------
+✅ Customer Service        - Port 8081 - RUNNING - http://localhost:8081
+✅ Product Pricing Service - Port 8082 - RUNNING - http://localhost:8082
+✅ FD Calculator Service   - Port 8083 - RUNNING - http://localhost:8083
+✅ Accounts Service        - Port 8084 - RUNNING - http://localhost:8084
+✅ Main Gateway            - Port 8080 - RUNNING - http://localhost:8080
+
+FRONTEND (Running in separate CMD window)
+--------------------------------------------------------------------------------
+✅ React App (Vite)        - Port 5173 - RUNNING - http://localhost:5173
+
+================================================================================
+                           QUICK ACCESS LINKS
+================================================================================
+
+🌐 MAIN APPLICATION:
+   http://localhost:5173
+
+📚 API DOCUMENTATION:
+   http://localhost:8080/swagger-ui.html
+   http://localhost:8081/swagger-ui.html (Customer)
+   http://localhost:8082/swagger-ui.html (Product)
+   http://localhost:8083/swagger-ui.html (FD Calculator)
+   http://localhost:8084/swagger-ui.html (Accounts)
+
+📊 MONITORING:
+   http://localhost:9000 (Kafdrop - Kafka Topics)
+
+================================================================================
+                          DATABASE CREDENTIALS
+================================================================================
+
+MySQL:
+  Host: localhost
+  Port: 3306
+  Username: root
+  Password: Aarav
+  Databases: customer_db, product_db, accounts_db, fd_calculator_db
+
+Redis:
+  Host: localhost
+  Port: 6379
+  No password
+
+================================================================================
+                         IMPORTANT NOTES
+================================================================================
+
+✅ All services are configured and running
+✅ MySQL password updated to 'Aarav' in all configuration files
+✅ Kafka and Zookeeper are ready for message processing
+✅ Redis is ready for caching
+✅ All databases will be auto-created on first connection
+
+⚠️  DO NOT CLOSE the command windows - they are running your services!
+
+📝 Check individual command windows for detailed logs and status
+
+================================================================================
+                           NEXT STEPS
+================================================================================
+
+1. Open your browser: http://localhost:5173
+2. Test the application
+3. Check Swagger UI for API documentation
+4. Monitor Kafka topics at http://localhost:9000
+
+================================================================================
+                         STOPPING SERVICES
+================================================================================
+
+To stop all services:
+1. Close all CMD windows (Customer, Product, FD Calculator, Accounts, Main, Frontend)
+2. Stop Docker services:
+   docker compose -f compose.yaml down
+
+To restart:
+   Run: start-everything.bat
+
+================================================================================
+                           FILES CREATED
+================================================================================
+
+✅ start-everything.bat      - Script to start all services
+✅ check-docker.bat          - Script to verify Docker status
+✅ STARTUP-INSTRUCTIONS.md   - Detailed startup guide
+✅ SERVICES-STATUS.md        - Current services status
+✅ RUNNING-SERVICES.txt      - This file
+
+================================================================================
+                         CONFIGURATION UPDATED
+================================================================================
+
+✅ customer/src/main/resources/application.yml
+✅ accounts/src/main/resources/application.yml
+✅ product-pricing/src/main/resources/application.yml
+✅ fd-calculator/src/main/resources/application.yml
+✅ compose.yaml
+
+All configured with MySQL password: Aarav
+
+================================================================================
+                              SUCCESS! 🎉
+================================================================================
+
+All microservices, Kafka, MySQL, Redis, and the React frontend are now
+running successfully. You can start using the application!
+
+Generated: 2025-11-08 23:22 IST
+================================================================================
