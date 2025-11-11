@@ -1,0 +1,14 @@
+﻿tunnel: cashcached-tunnel
+credentials-file: C:\Users\regre\.cloudflared\edf8a08a-0c19-4b06-b33a-11a2b26ee27b.json
+
+ingress:
+  - hostname: api.lucidity.sbs
+    service: http://localhost:8080
+
+  - hostname: app.lucidity.sbs
+    service: http://localhost:8080
+
+  - hostname: kafdrop.lucidity.sbs
+    service: http://localhost:9000
+
+  - service: http_status:404

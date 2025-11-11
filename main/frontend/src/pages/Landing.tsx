@@ -29,6 +29,7 @@ import {
   Shield,
   CreditCard,
   Calculator,
+  BarChart3,
 } from "lucide-react";
 
 export function Landing() {
@@ -227,6 +228,11 @@ export function Landing() {
               icon={<CreditCard className="w-6 h-6" />}
               title={t("landing.features.transparent")}
               description={t("landing.features.transparent.desc")}
+            />
+            <FeatureCard
+              icon={<BarChart3 className="w-6 h-6" />}
+              title={t("landing.features.insights")}
+              description={t("landing.features.insights.desc")}
             />
           </div>
         </div>

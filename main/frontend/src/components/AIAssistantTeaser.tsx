@@ -42,8 +42,8 @@ export function AIAssistantTeaser() {
         "interest rate":
           "Our current FD interest rates range from 6.5% to 8.5% depending on the tenure and amount invested.",
         fd: "A Fixed Deposit (FD) is an investment where you deposit a sum of money for a fixed period at a predetermined interest rate.",
-        blockchain:
-          "All CashCached accounts are backed by blockchain technology, ensuring complete transparency and security.",
+        security:
+          "Your deposits are protected with multi-layer security and continuous monitoring for potential threats.",
         ai: "I'm an AI assistant available 24/7 to answer your banking questions and help you make informed decisions.",
         default:
           "That's a great question! For more detailed information, please visit our help center or contact our support team.",

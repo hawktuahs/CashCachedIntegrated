@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const isTunnel = typeof window !== 'undefined' &&
+  window.location.hostname.endsWith('lucidity.sbs');
+
 export const api = axios.create({
-  baseURL: '/',
+  baseURL: isTunnel ? 'https://api.lucidity.sbs' : '/',
   headers: {
     'Content-Type': 'application/json',
   },

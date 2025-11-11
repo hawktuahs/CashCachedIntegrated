@@ -12,6 +12,16 @@ export default defineConfig({
     },
   },
   server: {
+    host: true, 
+    allowedHosts: ['app.lucidity.sbs', 'localhost'],
+    port: 5173,
+    strictPort: true,
+    cors: true,
+    hmr: {
+      protocol: 'wss',
+      host: 'app.lucidity.sbs',
+      clientPort: 443,
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8080',

@@ -53,7 +53,7 @@ public class MagicLinkService {
 
         redisTemplate.opsForValue().set(magicLinkKey, email, MAGIC_LINK_VALIDITY_MINUTES, TimeUnit.MINUTES);
 
-        String magicLink = frontendUrl + "/auth/magic-link?token=" + token;
+        String magicLink = buildMagicLinkUrl(token);
 
         if (devMode) {
             log.warn("\n\n" +
@@ -113,6 +113,22 @@ public class MagicLinkService {
         String sessionId = redisSessionService.createSession(user);
         return new AuthResponse(sessionId, user.getUsername(), email, user.getRole().name(),
                 "Authentication successful");
+    }
+
+    private String buildMagicLinkUrl(String token) {
+        String effectiveFrontendUrl = resolveFrontendUrl();
+        String normalizedBase = effectiveFrontendUrl.endsWith("/")
+                ? effectiveFrontendUrl.substring(0, effectiveFrontendUrl.length() - 1)
+                : effectiveFrontendUrl;
+        return normalizedBase + "/auth/magic-link?token=" + token;
+    }
+
+    private String resolveFrontendUrl() {
+        String envOverride = System.getenv("APP_FRONTEND_URL");
+        if (envOverride != null && !envOverride.isBlank()) {
+            return envOverride.trim();
+        }
+        return frontendUrl;
     }
 
     private void sendMagicLinkEmail(String to, String magicLink, String fullName) {

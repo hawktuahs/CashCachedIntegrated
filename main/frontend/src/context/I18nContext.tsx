@@ -427,6 +427,14 @@ const dict: Dict = {
     en: "View your account details",
     ja: "口座詳細を表示",
   },
+  "dashboard.quick.transactions.title": {
+    en: "Transactions",
+    ja: "取引",
+  },
+  "dashboard.quick.transactions.desc": {
+    en: "Review your recent account activity",
+    ja: "最近の取引状況を確認",
+  },
   "dashboard.quick.products.title": { en: "Products", ja: "商品" },
   "dashboard.quick.products.desc": {
     en: "Explore banking products",
@@ -769,18 +777,18 @@ const dict: Dict = {
   "landing.nav.getStarted": { en: "Get Started", ja: "始める" },
   "landing.nav.dashboard": { en: "Go to Dashboard", ja: "ダッシュボードへ" },
   "landing.hero.title": {
-    en: "Secure Banking on the Blockchain",
-    ja: "ブロックチェーン上のセキュアバンキング",
+    en: "Effortless Fixed Deposits for Everyone",
+    ja: "誰でも手軽に定期預金",
   },
   "landing.hero.subtitle": {
-    en: "Experience the future of fixed deposits with blockchain-backed security and AI-powered assistance. CashCached brings transparency, security, and intelligence to your banking.",
-    ja: "ブロックチェーンバックアップされたセキュリティとAIアシスタンスで、定期預金の未来を体験してください。CashCachedは透明性、セキュリティ、インテリジェンスをあなたの銀行業務にもたらします。",
+    en: "Automate renewals, monitor returns, and manage every account from a single dashboard. CashCached keeps your savings growing without the complexity.",
+    ja: "自動更新、リターンのモニタリング、すべての口座管理をひとつのダッシュボードで。CashCachedは複雑さなく貯蓄の成長を支えます。",
   },
   "landing.hero.openAccount": { en: "Open Account", ja: "口座を開く" },
   "landing.hero.learnMore": { en: "Learn More", ja: "詳細を見る" },
   "landing.hero.stat1.label": {
-    en: "Blockchain Secured",
-    ja: "ブロックチェーン保護",
+    en: "Trusted Protection",
+    ja: "信頼できる保護",
   },
   "landing.hero.stat2.label": { en: "AI Assistant", ja: "AIアシスタント" },
   "landing.hero.stat3.label": { en: "Hidden Fees", ja: "隠れた手数料" },
@@ -800,12 +808,12 @@ const dict: Dict = {
     ja: "最先端技術とユーザー中心設計による完全な銀行ソリューション",
   },
   "landing.features.security": {
-    en: "Blockchain Security",
-    ja: "ブロックチェーンセキュリティ",
+    en: "Advanced Security",
+    ja: "高度なセキュリティ",
   },
   "landing.features.security.desc": {
-    en: "Your accounts are secured by blockchain technology, ensuring immutability and transparency.",
-    ja: "あなたの口座はブロックチェーン技術で保護され、不変性と透明性を保証します。",
+    en: "Layered safeguards and real-time monitoring keep every account protected.",
+    ja: "多層防御とリアルタイム監視で、すべての口座を守ります。",
   },
   "landing.features.ai": { en: "AI Assistant", ja: "AIアシスタント" },
   "landing.features.ai.desc": {
@@ -817,21 +825,24 @@ const dict: Dict = {
     ja: "スマート計算",
   },
   "landing.features.calculation.desc": {
-    en: "Automated FD calculations with multiple compounding frequencies for optimal returns.",
-    ja: "最適なリターンのための複数の複利頻度による自動FD計算。",
+    en: "Forecast maturity values in seconds with flexible compounding options.",
+    ja: "柔軟な複利オプションで満期金額を数秒で予測します。",
   },
-  "landing.features.instant": { en: "Instant Processing", ja: "即時処理" },
+  "landing.features.instant": {
+    en: "Instant Processing",
+    ja: "即時処理",
+  },
   "landing.features.instant.desc": {
-    en: "Create accounts, calculate maturity, and manage investments in seconds.",
-    ja: "口座を開設し、満期を計算し、投資を数秒で管理します。",
+    en: "Open accounts, fund deposits, and manage redemptions without waiting.",
+    ja: "口座開設、入金、償還を待ち時間なく処理します。",
   },
   "landing.features.security2": {
-    en: "Bank-Grade Security",
-    ja: "銀行グレードセキュリティ",
+    en: "Unified Controls",
+    ja: "統合管理",
   },
   "landing.features.security2.desc": {
-    en: "JWT authentication, role-based access, and encrypted data storage.",
-    ja: "JWT認証、ロールベースアクセス、暗号化されたデータストレージ。",
+    en: "Manage approvals, limits, and account roles from a single console.",
+    ja: "承認、限度額、アカウント権限をひとつのコンソールで管理します。",
   },
   "landing.features.transparent": {
     en: "Transparent Pricing",
@@ -839,7 +850,15 @@ const dict: Dict = {
   },
   "landing.features.transparent.desc": {
     en: "No hidden fees. See exactly what you earn with complete pricing transparency.",
-    ja: "隠れた手数料なし。完全な価格透明性で正確に得られるものを確認してください。",
+    ja: "隠れた手数料なし。完全な価格の透明性で正確な収益を確認できます。",
+  },
+  "landing.features.insights": {
+    en: "Personalized Insights",
+    ja: "パーソナライズされたインサイト",
+  },
+  "landing.features.insights.desc": {
+    en: "Visualize growth forecasts and upcoming maturities with tailored dashboards.",
+    ja: "カスタマイズされたダッシュボードで成長予測と満期予定を可視化します。",
   },
   "landing.steps.title": {
     en: "Get Started in 3 Simple Steps",
@@ -890,8 +909,8 @@ const dict: Dict = {
   "landing.cta.start": { en: "Start Free Today", ja: "今日から無料で始める" },
   "landing.cta.demo": { en: "Schedule Demo", ja: "デモをスケジュール" },
   "landing.footer.tagline": {
-    en: "Blockchain-backed banking for the modern era.",
-    ja: "モダンエラのためのブロックチェーンバックアップバンキング。",
+    en: "Modern banking built around you.",
+    ja: "あなたを中心に設計されたモダンバンキング。",
   },
   "landing.footer.product": { en: "Product", ja: "商品" },
   "landing.footer.company": { en: "Company", ja: "会社" },
@@ -906,8 +925,8 @@ const dict: Dict = {
   "landing.footer.terms": { en: "Terms", ja: "利用規約" },
   "landing.footer.contact": { en: "Contact", ja: "お問い合わせ" },
   "landing.footer.copyright": {
-    en: "© 2024 CashCached. All rights reserved. | Blockchain-powered banking platform",
-    ja: "© 2024 CashCached。著作権所有。| ブロックチェーン搭載バンキングプラットフォーム",
+    en: "© 2024 CashCached. All rights reserved. | Digital-first banking platform",
+    ja: "© 2024 CashCached。著作権所有。| デジタルファーストのバンキングプラットフォーム",
   },
   "sidebar.wallet.title": { en: "Wallet Balance", ja: "ウォレット残高" },
   "sidebar.wallet.available": { en: "Available Balance", ja: "利用可能残高" },
