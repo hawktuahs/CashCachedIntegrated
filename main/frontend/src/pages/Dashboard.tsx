@@ -372,6 +372,13 @@ export function Dashboard() {
       color: "bg-emerald-50 text-emerald-700",
     },
     {
+      title: t("dashboard.quick.transactions.title") || "Transactions",
+      description: t("dashboard.quick.transactions.desc") || "View your account transactions",
+      icon: Activity,
+      href: "/accounts",
+      color: "bg-emerald-50 text-emerald-700",
+    },
+    {
       title: t("dashboard.quick.products.title"),
       description: t("dashboard.quick.products.desc"),
       icon: Package,

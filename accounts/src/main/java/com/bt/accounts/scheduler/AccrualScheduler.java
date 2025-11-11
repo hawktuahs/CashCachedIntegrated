@@ -119,18 +119,17 @@ public class AccrualScheduler {
             BigDecimal annualRate = account.getInterestRate() != null ? account.getInterestRate() : BigDecimal.ZERO;
             BigDecimal annualRateDecimal = annualRate.divide(BigDecimal.valueOf(100));
             BigDecimal interestRaw = currentBalance.multiply(annualRateDecimal);
-            BigDecimal interest = interestRaw.setScale(0, RoundingMode.CEILING);
+            BigDecimal interest = interestRaw.setScale(2, RoundingMode.HALF_UP);
 
-            if (interest.compareTo(BigDecimal.ONE) >= 0) {
-                addInterestTokensToTreasury(account, interest, nextAccrual);
+            if (interest.compareTo(new BigDecimal("0.00")) > 0) {
                 TransactionResponse txn = creditInterest(account, interest, nextAccrual);
                 currentBalance = txn.getBalanceAfter();
                 totalAccrued = totalAccrued.add(interest);
-                log.info("Accrued {} tokens interest for account {} on {}", interest, accountNo,
-                        nextAccrual.toLocalDate());
+                log.info("Accrued {} interest for account {} on {}", interest, accountNo,
+                        nextAccrual);
             } else {
-                log.debug("Accrual skipped for account={} on {} due to interest {} < 1", accountNo,
-                        nextAccrual.toLocalDate(), interest);
+                log.debug("Accrual skipped for account={} on {} due to zero interest", accountNo,
+                        nextAccrual);
             }
 
             account.setLastInterestAccrualAt(nextAccrual);
@@ -200,30 +199,22 @@ public class AccrualScheduler {
                 .build(), when);
     }
 
-    private void addInterestTokensToTreasury(FdAccount account, BigDecimal amount, LocalDateTime when) {
-        String reference = "Interest accrual " + account.getAccountNo() + " @ " + when.toLocalDate();
-        try {
-            cashCachedService.addInterestToTreasury(amount, reference);
-            log.info("Added {} to treasury for interest backing for account {}", amount, account.getAccountNo());
-        } catch (Exception ex) {
-            log.error("Adding interest to treasury failed for account {}: {}", account.getAccountNo(), ex.getMessage(), ex);
-        }
-    }
+    // No treasury interaction
 
     private void finalizeMaturity(FdAccount account, BigDecimal balance, LocalDateTime when) {
-        BigDecimal payout = balance.setScale(0, RoundingMode.DOWN);
-        if (payout.compareTo(BigDecimal.ONE) < 0) {
+        BigDecimal payout = balance.setScale(2, RoundingMode.HALF_UP);
+        if (payout.compareTo(new BigDecimal("0.00")) <= 0) {
             markAccountClosed(account, when);
             return;
         }
         transactionService.recordTransaction(account.getAccountNo(), TransactionRequest.builder()
                 .transactionType(AccountTransaction.TransactionType.MATURITY_PAYOUT.name())
                 .amount(payout)
-                .description("Maturity payout to wallet")
+                .description("Maturity payout")
                 .remarks("System maturity closure")
                 .build(), when);
         markAccountClosed(account, when);
-        log.info("Account {} matured and paid {} tokens", account.getAccountNo(), balance);
+        log.info("Account {} matured and paid {}", account.getAccountNo(), payout);
     }
 
     private void markAccountClosed(FdAccount account, LocalDateTime when) {

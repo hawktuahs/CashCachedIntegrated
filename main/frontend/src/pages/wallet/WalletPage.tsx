@@ -95,9 +95,10 @@ export function WalletPage() {
       );
       const payload = response?.data?.data ?? response?.data;
       const targetValue = Number(payload?.targetValue ?? payload?.balance ?? 0);
-      const displayCurrency = payload?.targetCurrency || payload?.baseCurrency || "INR";
+      const base = String(payload?.baseCurrency || "INR");
       setWalletBalance(Number.isFinite(targetValue) ? targetValue : 0);
-      setBaseCurrency(displayCurrency);
+      // Keep true wallet base currency for transaction conversion
+      setBaseCurrency(base);
     } catch (error) {
       console.error("Failed to load wallet balance", error);
       toast.error("Unable to load wallet balance");

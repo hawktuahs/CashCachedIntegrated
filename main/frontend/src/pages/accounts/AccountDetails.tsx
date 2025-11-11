@@ -78,6 +78,29 @@ export function AccountDetails() {
   const [isPosting, setIsPosting] = useState(false);
   const preferredCurrency = useAuth().preferredCurrency;
 
+  const convertCurrency = (amount: number, fromCurrency?: string, toCurrency?: string) => {
+    const EXCHANGE_RATES: Record<string, number> = {
+      USD: 1.0,
+      EUR: 0.92,
+      GBP: 0.78,
+      INR: 83.2,
+      KWD: 0.31,
+      AED: 3.67,
+      CAD: 1.36,
+      JPY: 149.5,
+      CNY: 7.24,
+      MXN: 18.4,
+      ZAR: 18.2,
+    };
+    const from = (fromCurrency || "INR").toUpperCase();
+    const to = (toCurrency || from).toUpperCase();
+    if (from === to) return amount;
+    const fromRate = EXCHANGE_RATES[from] || 1;
+    const toRate = EXCHANGE_RATES[to] || 1;
+    const usdAmount = amount / fromRate;
+    return usdAmount * toRate;
+  };
+
   const parseTokens = (value: string) => {
     const normalized = value.trim();
     if (!normalized) return 0;
@@ -206,9 +229,7 @@ export function AccountDetails() {
           })(),
           amount,
           description: String(t.description ?? ""),
-          timestamp: String(
-            t.createdAt ?? t.timestamp ?? new Date().toISOString()
-          ),
+          timestamp: String(t.transactionDate ?? t.createdAt ?? t.timestamp ?? new Date().toISOString()),
           balance,
         } as Transaction;
       });
@@ -613,7 +634,10 @@ export function AccountDetails() {
                   </p>
                   <div className="flex flex-col">
                     <span className="text-xl font-semibold">
-                      {formatCurrency(account.principalAmount, account.currency || preferredCurrency)}
+                      {formatCurrency(
+                        convertCurrency(account.principalAmount, account.currency, preferredCurrency),
+                        preferredCurrency
+                      )}
                     </span>
                   </div>
                 </div>
@@ -631,7 +655,10 @@ export function AccountDetails() {
                   </p>
                   <div className="flex flex-col">
                     <span className="text-xl font-semibold text-green-600">
-                      {formatCurrency(account.accruedInterest, account.currency || preferredCurrency)}
+                      {formatCurrency(
+                        convertCurrency(account.accruedInterest, account.currency, preferredCurrency),
+                        preferredCurrency
+                      )}
                     </span>
                   </div>
                 </div>
@@ -639,7 +666,10 @@ export function AccountDetails() {
                   <p className="text-sm font-medium text-muted-foreground">Maturity Value</p>
                   <div className="flex flex-col">
                     <span className="text-xl font-semibold text-primary">
-                      {formatCurrency(account.maturityAmount, account.currency || preferredCurrency)}
+                      {formatCurrency(
+                        convertCurrency(account.maturityAmount, account.currency, preferredCurrency),
+                        preferredCurrency
+                      )}
                     </span>
                   </div>
                 </div>
@@ -702,15 +732,15 @@ export function AccountDetails() {
                         >
                           {transaction.amount >= 0 ? "+" : "-"}
                           {formatCurrency(
-                            Math.abs(transaction.amount),
-                            account.currency || preferredCurrency
+                            convertCurrency(Math.abs(transaction.amount), account.currency, preferredCurrency),
+                            preferredCurrency
                           )}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           Balance after:{" "}
                           {formatCurrency(
-                            transaction.balance,
-                            account.currency || preferredCurrency
+                            convertCurrency(transaction.balance, account.currency, preferredCurrency),
+                            preferredCurrency
                           )}
                         </p>
                       </div>

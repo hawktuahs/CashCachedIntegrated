@@ -102,6 +102,10 @@ public class AccountService {
 
         String accountNo = accountNumberGenerator.generateAccountNumber(request.getBranchCode());
 
+        // Debit customer's wallet for principal in request currency
+        cashCachedService.debitWallet(request.getCustomerId(), principalAmount, currency,
+                "FD funding for " + accountNo);
+
         // No wallet funding or tokenization
 
         FdAccount account = FdAccount.builder()
@@ -899,7 +903,9 @@ public class AccountService {
 
         String accountNo = accountNumberGenerator.generateAccountNumber(request.getBranchCode());
 
-        // No wallet funding or tokenization for V1
+        // Debit customer's wallet for principal in request currency
+        cashCachedService.debitWallet(request.getCustomerId(), principalAmount, currency,
+                "FD funding for " + accountNo);
 
         FdAccount account = FdAccount.builder()
                 .accountNo(accountNo)
@@ -978,6 +984,8 @@ public class AccountService {
                             finalTenure, product.getMinTermMonths(), product.getMaxTermMonths()));
         }
 
+        String currency = request.getCurrency() != null ? request.getCurrency() : "INR";
+
         AccountCreationRequest fullRequest = AccountCreationRequest.builder()
                 .customerId(request.getCustomerId())
                 .productCode(request.getProductCode())
@@ -1001,7 +1009,7 @@ public class AccountService {
                 .productRefId(product.getId())
                 .productType(product.getProductType())
                 .principalAmount(principalAmount)
-                .currency(request.getCurrency() != null ? request.getCurrency() : "INR")
+                .currency(currency)
                 .interestRate(finalInterestRate)
                 .baseInterestRate(finalInterestRate)
                 .tenureMonths(finalTenure)

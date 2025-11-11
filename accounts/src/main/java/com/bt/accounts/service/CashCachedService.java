@@ -241,6 +241,17 @@ public class CashCachedService {
     public CashCachedLedgerEntry creditWallet(String customerId, BigDecimal amount, String currency, String reference) {
         CashCachedWallet wallet = ensureWallet(customerId);
         String userBaseCurrency = wallet.getBaseCurrency() != null ? wallet.getBaseCurrency() : "INR";
+        // If a specific currency is provided and differs, rebase wallet to that currency
+        if (currency != null) {
+            String normalized = normalizeCurrency(currency);
+            if (!normalized.equalsIgnoreCase(userBaseCurrency)) {
+                BigDecimal rebased = convertCurrency(wallet.getBalance(), userBaseCurrency, normalized)
+                        .setScale(2, RoundingMode.HALF_UP);
+                wallet.setBalance(rebased);
+                wallet.setBaseCurrency(normalized);
+                userBaseCurrency = normalized;
+            }
+        }
         
         BigDecimal amountInBaseCurrency = convertCurrency(amount, currency, userBaseCurrency);
         BigDecimal roundedAmount = amountInBaseCurrency.setScale(2, RoundingMode.HALF_UP);
@@ -271,6 +282,17 @@ public class CashCachedService {
     public CashCachedLedgerEntry debitWallet(String customerId, BigDecimal amount, String currency, String reference) {
         CashCachedWallet wallet = ensureWallet(customerId);
         String userBaseCurrency = wallet.getBaseCurrency() != null ? wallet.getBaseCurrency() : "INR";
+        // If a specific currency is provided and differs, rebase wallet to that currency
+        if (currency != null) {
+            String normalized = normalizeCurrency(currency);
+            if (!normalized.equalsIgnoreCase(userBaseCurrency)) {
+                BigDecimal rebased = convertCurrency(wallet.getBalance(), userBaseCurrency, normalized)
+                        .setScale(2, RoundingMode.HALF_UP);
+                wallet.setBalance(rebased);
+                wallet.setBaseCurrency(normalized);
+                userBaseCurrency = normalized;
+            }
+        }
         
         BigDecimal amountInBaseCurrency = convertCurrency(amount, currency, userBaseCurrency);
         BigDecimal roundedAmount = amountInBaseCurrency.setScale(2, RoundingMode.HALF_UP);

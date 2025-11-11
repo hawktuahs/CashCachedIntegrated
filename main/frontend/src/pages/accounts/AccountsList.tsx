@@ -68,6 +68,29 @@ export function AccountsList() {
 
   const isAdmin = user?.role === "ADMIN" || user?.role === "BANKOFFICER";
 
+  const convertCurrency = (amount: number, fromCurrency?: string, toCurrency?: string) => {
+    const EXCHANGE_RATES: Record<string, number> = {
+      USD: 1.0,
+      EUR: 0.92,
+      GBP: 0.78,
+      INR: 83.2,
+      KWD: 0.31,
+      AED: 3.67,
+      CAD: 1.36,
+      JPY: 149.5,
+      CNY: 7.24,
+      MXN: 18.4,
+      ZAR: 18.2,
+    };
+    const from = (fromCurrency || "INR").toUpperCase();
+    const to = (toCurrency || from).toUpperCase();
+    if (from === to) return amount;
+    const fromRate = EXCHANGE_RATES[from] || 1;
+    const toRate = EXCHANGE_RATES[to] || 1;
+    const usdAmount = amount / fromRate;
+    return usdAmount * toRate;
+  };
+
   const exportCsv = () => {
     const rows = [
       [
@@ -379,8 +402,8 @@ export function AccountsList() {
             <CardContent>
               <div className="text-2xl font-bold">
                 {formatCurrency(
-                  accounts.reduce((sum, acc) => sum + acc.principalAmount, 0),
-                  accounts[0]?.currency || preferredCurrency
+                  accounts.reduce((sum, acc) => sum + convertCurrency(acc.principalAmount, acc.currency, preferredCurrency), 0),
+                  preferredCurrency
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -398,8 +421,8 @@ export function AccountsList() {
             <CardContent>
               <div className="text-2xl font-bold">
                 {formatCurrency(
-                  accounts.reduce((sum, acc) => sum + acc.currentBalance, 0),
-                  accounts[0]?.currency || preferredCurrency
+                  accounts.reduce((sum, acc) => sum + convertCurrency(acc.currentBalance, acc.currency, preferredCurrency), 0),
+                  preferredCurrency
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -417,8 +440,8 @@ export function AccountsList() {
             <CardContent>
               <div className="text-2xl font-bold text-emerald-600">
                 +{formatCurrency(
-                  accounts.reduce((sum, acc) => sum + acc.accruedInterest, 0),
-                  accounts[0]?.currency || preferredCurrency
+                  accounts.reduce((sum, acc) => sum + convertCurrency(acc.accruedInterest, acc.currency, preferredCurrency), 0),
+                  preferredCurrency
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -530,8 +553,8 @@ export function AccountsList() {
                     </div>
                     <div className="flex flex-col text-xl font-bold">
                       <span>{formatCurrency(
-                          account.currentBalance,
-                          account.currency
+                          convertCurrency(account.currentBalance, account.currency, preferredCurrency),
+                          preferredCurrency
                         )}</span>
                     </div>
                   </div>
@@ -553,8 +576,8 @@ export function AccountsList() {
                   </div>
                   <div className="flex flex-col text-sm">
                     <span>{formatCurrency(
-                        account.principalAmount,
-                        account.currency
+                        convertCurrency(account.principalAmount, account.currency, preferredCurrency),
+                        preferredCurrency
                       )}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
@@ -564,8 +587,8 @@ export function AccountsList() {
                   <div className="flex flex-col text-sm">
                     <span className="text-emerald-600 font-semibold">
                       +{formatCurrency(
-                        account.accruedInterest,
-                        account.currency
+                        convertCurrency(account.accruedInterest, account.currency, preferredCurrency),
+                        preferredCurrency
                       )}
                     </span>
                   </div>
